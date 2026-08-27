@@ -16,27 +16,21 @@ function SelectMaterialCell(slabMaterial)
 end
 
 common.PutSlab = function (slabMaterial)
-    local isThereFloor, floorDetails = turtle.inspectDown()
-    if isThereFloor then
-        if floorDetails.name ~= slabMaterial then
-            while turtle.detectDown() do
-                -- print("inside while 1")
-                turtle.digDown()
-            end
-            if SelectMaterialCell(slabMaterial) then
-               turtle.placeDown()
-            else
-                print("No material found")
-            end
+    if not putSlab then
+        return
+    end
+    local _, floorDetails = turtle.inspectDown()
+    if floorDetails.name ~= slabMaterial then
+        while turtle.detectDown() do
+            -- print("inside while 1")
+            turtle.digDown()
         end
-    else
         if SelectMaterialCell(slabMaterial) then
            turtle.placeDown()
         else
             print("No material found")
         end
     end
-    
 end
 
 common.TurnTurtle = function (toDirection)
@@ -106,21 +100,21 @@ common.MoveDown = function (steps)
     end
 end
 
-common.MovetoLocation = function (x,y,z,putSlab,slabMaterial)
+common.MovetoLocation = function (x,y,z)
     if common.cx < x then
         common.TurnTurtle(1)
-        common.MoveForward(x-common.cx,putSlab,slabMaterial)
+        common.MoveForward(x-common.cx)
     elseif common.cx > x then
         common.TurnTurtle(3)
-        common.MoveForward(common.cx-x,putSlab,slabMaterial)
+        common.MoveForward(common.cx-x)
     end
 
     if common.cy < y then
         common.TurnTurtle(0)
-        common.MoveForward(y-common.cy,putSlab,slabMaterial)
+        common.MoveForward(y-common.cy)
     elseif common.cy > y then
         common.TurnTurtle(2)
-        common.MoveForward(common.cy-y,putSlab,slabMaterial)
+        common.MoveForward(common.cy-y)
     end
 
     if common.cz < z then
