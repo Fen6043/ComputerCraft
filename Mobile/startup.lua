@@ -1,0 +1,7 @@
+local modem = peripheral.find("modem")
+local myNumber = os.getComputerID()
+modem.open(myNumber)
+local id = multishell.launch({}, "turtle.lua")
+multishell.setTitle(id, "Turtle")
+id = multishell.launch({}, "getMessage.lua")
+multishell.setTitle(id, "Message")
