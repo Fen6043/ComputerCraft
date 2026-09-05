@@ -1,2 +1,2 @@
-local TurtleRouter = require("routerTurtleLib")
-TurtleRouter.Start()
+local id = shell.openTab("routerTurtleLib.lua")
+multishell.setTitle(id, "TurtleHotSpot")

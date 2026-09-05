@@ -45,8 +45,9 @@ function Mine()
     local xdirection = 1
     local ydirection = 0
 
-    if not CTL.CheckFuel(((x) * (y) * math.ceil((z)/2)) + (2 * depth) + (x + y + z - 3)) then
-        return
+    while not CTL.CheckFuel(((x) * (y) * math.ceil((z)/2)) + (2 * depth) + (x + y + z - 3)) do
+        read()
+        shell.run("refuel")
     end
 
     print("Create ladder(y/n)" .. "[" .. (depth) .. " nos]".. ":")
@@ -103,6 +104,7 @@ function Mine()
         action = "Mine"
     end
 
+    CTL.moveAlongXFirst = true -- Reset moveAlongXFirst to true before starting the mining operation
     for j = 1, z, 2 do
         for i = 1, x, 1 do
             if i == 1 then -- Edge case

@@ -1,4 +1,5 @@
 local args = {...}
+local modem = peripheral.find("modem") or error("No modem attached", 0)
 -- print("args[1]:" .. args[1])
 
 local CTL = require("commonTurtlelib")
@@ -38,19 +39,18 @@ function Mine()
     local floor = argSplit[4] or "n"
     local xdirection = 1
     local ydirection = 0
-    local modem = peripheral.find("modem") or error("No modem attached", 0)
-    local myNumber = os.getComputerID()
 
-    if not CTL.CheckFuel(((x) * (y) * math.ceil((z)/2)) + (x + y + z - 3)) then
-        modem.transmit(CTL.adminNumber, myNumber, "Not Enough Fuel for turtle:" .. myNumber)
-        return
+    while not CTL.CheckFuel(((x) * (y) * math.ceil((z)/2)) + (x + y + z - 3)) do
+        modem.transmit(CTL.adminNumber, CTL.myNumber, "Not Enough Fuel for turtle:" .. CTL.myNumber)
+        read()
+        shell.run("refuel")
     end
 
     if floor == "y" then
         putSlab = true
         while not turtle.getItemDetail(1) do
             print("Keep slab material in slot 1 and press enter")
-            modem.transmit(CTL.adminNumber, myNumber, "Keep slab material in turtle:" .. myNumber)
+            modem.transmit(CTL.adminNumber, CTL.myNumber, "Keep slab material in turtle:" .. CTL.myNumber)
             read()
         end
         slabMaterial = turtle.getItemDetail(1).name
@@ -60,7 +60,7 @@ function Mine()
         local invItemCount = CTL.CountItem(slabMaterial)
         while (invItemCount < needItemCount) do
             print("Insufficient floor tiles" .. invItemCount .. "/" .. needItemCount)
-            modem.transmit(CTL.adminNumber, myNumber, "Insufficient floor tiles in turtle:" .. myNumber)
+            modem.transmit(CTL.adminNumber, CTL.myNumber, "Insufficient floor tiles in turtle:" .. CTL.myNumber)
             read()
             invItemCount = CTL.CountItem(slabMaterial)
         end
@@ -72,8 +72,8 @@ function Mine()
         action = "Mine"
     end
 
-    modem.transmit(CTL.adminNumber, myNumber, "Mining starting for turtle:" .. myNumber)
-
+    modem.transmit(CTL.adminNumber, CTL.myNumber, "Mining starting for turtle:" .. CTL.myNumber)
+    CTL.moveAlongXFirst = true -- Reset moveAlongXFirst to true before starting the mining operation
     for j = 1, z, 2 do
         for i = 1, x, 1 do
             if i == 1 then -- Edge case
@@ -112,7 +112,7 @@ function Mine()
 
     CTL.MovetoLocation(0,0,0)
     CTL.TurnTurtle(0)
-    modem.transmit(CTL.adminNumber, myNumber, "Mining completed for turtle:" .. myNumber)
+    modem.transmit(CTL.adminNumber, CTL.myNumber, "Mining completed for turtle:" .. CTL.myNumber)
 end
 
 Mine()

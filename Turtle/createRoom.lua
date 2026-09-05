@@ -51,7 +51,7 @@ function CreateRoom()
     local needItemCount = 0
     local invItemCount = 0
 
-    if not CTL.CheckFuel(((x+1) * (y+1) * (z+1)) + (2 * depth) + (x + y + z)) then
+    if not CTL.CheckFuel((x* y * z) + (2 * depth) + (x + y + z - 3)) then
         return
     end
 
@@ -60,7 +60,7 @@ function CreateRoom()
         read()
     end
     floormaterial = turtle.getItemDetail(1).name
-    needItemCount = ((x+1) * (y+1))
+    needItemCount = x * y
     invItemCount = CTL.CountItem(floormaterial)
     while (invItemCount < needItemCount) do
         print("Insufficient floormaterial " .. invItemCount .. "/" .. needItemCount)
@@ -73,7 +73,7 @@ function CreateRoom()
         read()
     end
     wallmaterial = turtle.getItemDetail(2).name
-    needItemCount = ((2 * ((x+1) * (z+1))) + (2 * ((y+1) * (z+1))))
+    needItemCount = ((2 * x * z) + (2 * y * z))
     invItemCount = CTL.CountItem(wallmaterial)
     while (invItemCount < needItemCount) do
         print("Insufficient wallmaterial " .. invItemCount .. "/" .. needItemCount)
@@ -86,7 +86,7 @@ function CreateRoom()
         read()
     end
     roofmaterial = turtle.getItemDetail(3).name
-    needItemCount = ((x+1) * (y+1))
+    needItemCount = x * y
     invItemCount = CTL.CountItem(roofmaterial)
     while (invItemCount < needItemCount) do
         print("Insufficient roofmaterial " .. invItemCount .. "/" .. needItemCount)
@@ -96,16 +96,16 @@ function CreateRoom()
 
     CTL.MoveDown(depth)
 
-    for k = 0, z, 1 do
-        for j = 0, x, 1 do
+    for k = 1, z, 1 do
+        for j = 1, x, 1 do
             if xdirection == 1 then
-                CTL.MovetoLocation(j,CTL.cy,CTL.cz)
+                CTL.MovetoLocation(j-1,CTL.cy,CTL.cz)
             else
                 CTL.MovetoLocation(x-j,CTL.cy,CTL.cz)
             end
 
-            for i = 0, y, 1 do
-                if k == 0 then
+            for i = 1, y, 1 do
+                if k == 1 then
                     CTL.PutSlab(floormaterial)
                 end
 

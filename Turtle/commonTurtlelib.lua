@@ -1,4 +1,5 @@
 local common = {}
+local modem = peripheral.find("modem")
 
 common.cx = 0
 common.cy = 0
@@ -9,6 +10,8 @@ common.initialy = 0
 common.initialz = 0
 common.collided = false
 common.adminNumber = 5 -- SET THE ADMIN NUMBER
+common.myNumber = os.getComputerID()
+common.moveAlongXFirst = true
 
 -- Trash coordinate system in minecraft
 --  0    -y
@@ -166,17 +169,18 @@ common.MoveForward = function (steps,putSlab,slabMaterial,action)
     slabMaterial = slabMaterial or ""
     action = action or "Move"
     for i = 1, steps, 1 do
+        local isItTurtleTries = 0
         while turtle.detect() do
             local isThereblock, blockDetails = turtle.inspect()
             if isThereblock and blockDetails.name:find("turtle",1,true) == nil then
                 turtle.dig()
             elseif isThereblock and blockDetails.name:find("turtle",1,true) ~= nil then
-                os.sleep(1)
-                isThereblock, blockDetails = turtle.inspect()
-                if isThereblock and blockDetails.name:find("turtle",1,true) ~= nil then
-                  common.collided = true
-                  return
+                isItTurtleTries = isItTurtleTries + 1
+                if isItTurtleTries > 5 then
+                    common.collided = true
+                    return
                 end
+                os.sleep(1)
             end
         end
         turtle.forward()
@@ -268,15 +272,7 @@ common.MoveDownLadder = function (steps)
     turtle.select(1)
 end
 
-common.MovetoLocation = function (x,y,z,putSlab,slabMaterial,action)
-    -- print ("Current location - " .. common.cx .. "/" .. common.cy .. "/" .. common.cz)
-    -- print("Moving to location - " .. x .. "/" .. y .. "/" .. z)
-    if common.cz < z then
-        common.MoveUp(z-common.cz)
-    elseif common.cz > z then
-        common.MoveDown(common.cz-z)
-    end
-
+function MoveAlongX(x,putSlab,slabMaterial,action)
     if common.cx < x then
         common.TurnTurtle(1)
         common.MoveForward(x-common.cx,putSlab,slabMaterial,action)
@@ -284,7 +280,9 @@ common.MovetoLocation = function (x,y,z,putSlab,slabMaterial,action)
         common.TurnTurtle(3)
         common.MoveForward(common.cx-x,putSlab,slabMaterial,action)
     end
+end
 
+function MoveAlongY(y,putSlab,slabMaterial,action)
     if common.cy < y then
         common.TurnTurtle(2)
         common.MoveForward(y-common.cy,putSlab,slabMaterial,action)
@@ -292,13 +290,36 @@ common.MovetoLocation = function (x,y,z,putSlab,slabMaterial,action)
         common.TurnTurtle(0)
         common.MoveForward(common.cy-y,putSlab,slabMaterial,action)
     end
+end
+
+common.MovetoLocation = function (x,y,z,putSlab,slabMaterial,action)
+    -- print ("Current location - " .. common.cx .. "/" .. common.cy .. "/" .. common.cz)
+    -- print("Moving to location - " .. x .. "/" .. y .. "/" .. z)
+    if common.moveAlongXFirst then
+        MoveAlongX(x,putSlab,slabMaterial,action)
+        MoveAlongY(y,putSlab,slabMaterial,action)
+    else
+        MoveAlongY(y,putSlab,slabMaterial,action)
+        MoveAlongX(x,putSlab,slabMaterial,action)
+    end
+
+    if common.cz < z then
+        common.MoveUp(z-common.cz)
+    elseif common.cz > z then
+        common.MoveDown(common.cz-z)
+    end
 
     if common.collided then
-        common.collided = false
-        common.TurnTurtle((common.faceDirection + 1) % 4)
-        common.MoveForward(1)
-        common.TurnTurtle((common.faceDirection - 1) % 4)
-        common.MoveForward(2)
+        while common.collided do
+            common.collided = false
+            common.TurnTurtle((common.faceDirection + 1) % 4)
+            common.MoveForward(1)
+            if not common.collided then
+                common.TurnTurtle((common.faceDirection - 1) % 4)
+                common.MoveForward(2)
+            end
+        end
+        common.moveAlongXFirst = not common.moveAlongXFirst
         common.MovetoLocation(x,y,z,putSlab,slabMaterial,action)
     end
 end
@@ -306,7 +327,7 @@ end
 common.CheckFuel = function (steps)
     local currentFuel = turtle.getFuelLevel()
     if steps > currentFuel then
-        print("Not Enough Fuel. currentFuel Level - " .. currentFuel .. "/" .. steps)
+        print("Not Enough Fuel, Please refuel and press enter. currentFuel Level - " .. currentFuel .. "/" .. steps)
         return false
     else
         --print("Steps to take - " .. steps)
@@ -336,6 +357,7 @@ common.CalibrateTurtle = function ()
         end
         if try > 4 then
             print("Not able to calibrate direction")
+            modem.transmit(common.adminNumber, common.myNumber, "Not able to calibrate direction for turtle:" .. common.myNumber)
             return
         end
     end
@@ -354,7 +376,13 @@ common.CalibrateTurtle = function ()
     end
     --print(common.faceDirection)
     common.MovetoLocation(common.initialx,common.initialy,common.initialz)
-    common.TurnTurtle(0)
+    if try == 1 then
+      common.TurnTurtle((common.faceDirection + 2) % 4)
+    elseif try == 2 then
+        common.TurnTurtle((common.faceDirection + 1) % 4)
+    elseif try == 4 then
+        common.TurnTurtle((common.faceDirection - 1) % 4)
+    end
     print(common.cx .. "/" .. common.cy .. "/" .. common.cz)
 end
 
