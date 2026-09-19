@@ -1,0 +1,7 @@
+local monitor = peripheral.find("monitor")
+local modem = peripheral.find("modem")
+modem.open(os.getComputerID())
+local id = shell.openTab("versionControl.lua")
+multishell.setTitle(id, "VersionControl")
+monitor.clear()
+monitor.setCursorPos(1, 1)

@@ -1,3 +1,4 @@
+local envvar = require("envvar")
 local common = {}
 local modem = peripheral.find("modem")
 
@@ -9,8 +10,8 @@ common.initialx = 0
 common.initialy = 0
 common.initialz = 0
 common.collided = false
-common.adminNumber = 5 -- SET THE ADMIN NUMBER
-common.myNumber = os.getComputerID()
+common.adminNumber = envvar.adminNumber
+common.myNumber = envvar.myNumber
 common.moveAlongXFirst = true
 
 -- Trash coordinate system in minecraft
@@ -309,12 +310,32 @@ common.MovetoLocation = function (x,y,z,putSlab,slabMaterial,action)
         common.MoveDown(common.cz-z)
     end
 
+    if common.cx == x and common.cy == y and common.cz == z then -- Some cases it reaches the location but collided will be true
+        return
+    end
+
     if common.collided then
+        local turnCount = 0 -- To check if turtle cannot move in xy plane
         while common.collided do
+            if turnCount >= 4 then
+                turnCount = 0
+                common.collided = false
+                common.MoveUp(1)
+                if common.collided then
+                    common.collided = false
+                    common.MoveDown(1)
+                    if common.collided then
+                        print("Cannot Move")
+                        return
+                    end
+                end
+            end
             common.collided = false
             common.TurnTurtle((common.faceDirection + 1) % 4)
+            turnCount = turnCount + 1
             common.MoveForward(1)
             if not common.collided then
+                turnCount = 0
                 common.TurnTurtle((common.faceDirection - 1) % 4)
                 common.MoveForward(2)
             end
@@ -342,9 +363,9 @@ common.CalibrateTurtle = function ()
     common.initialy = common.cy
     print("calibrating...")
     --print(common.initialx .. "/" .. common.initialy .. "/" .. common.initialz)
-    local fuelLevel = common.CheckFuel(5)
-    if not fuelLevel then
-        return
+    while not common.CheckFuel(5) do
+        read()
+        shell.run("refuel")
     end
     local try = 1
     while true do
@@ -357,7 +378,9 @@ common.CalibrateTurtle = function ()
         end
         if try > 4 then
             print("Not able to calibrate direction")
-            modem.transmit(common.adminNumber, common.myNumber, "Not able to calibrate direction for turtle:" .. common.myNumber)
+            for _, value in ipairs(common.adminNumber) do
+                modem.transmit(value, common.myNumber, "Not able to calibrate direction for turtle:" .. common.myNumber)
+            end
             return
         end
     end
