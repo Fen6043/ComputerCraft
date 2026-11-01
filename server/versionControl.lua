@@ -1,4 +1,4 @@
-local turtleV = 12
+local turtleV = 13
 local pocketV = 6
 local modem = peripheral.find("modem")
 while true do

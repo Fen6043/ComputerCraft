@@ -4,7 +4,8 @@ local modem = peripheral.find("modem")
 function RemoveTrash(slabMaterial)
     local trashMaterials = {["minecraft:cobblestone"] = true,["minecraft:blackstone"] = true,["minecraft:cobbled_deepslate"] = true
     ,["minecraft:gravel"] = true,["minecraft:tuff"] = true,["minecraft:dirt"] = true,["minecraft:calcite"] = true,
-    ["create:limestone"] = true,["minecraft:diorite"] = true,["minecraft:andesite"] = true}
+    ["create:limestone"] = true,["minecraft:diorite"] = true,["minecraft:andesite"] = true,["minecraft:smooth_basalt"] = true,
+    ["minecraft:coarse_dirt"] = true}
     for i = 1, 16, 1 do
         if turtle.getItemDetail(i) then
             if trashMaterials[turtle.getItemDetail(i).name] and turtle.getItemDetail(i).name ~= slabMaterial then
